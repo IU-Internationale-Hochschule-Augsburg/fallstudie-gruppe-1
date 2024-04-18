@@ -5,3 +5,4 @@ Stakeholder
 <br> -> End users: High interest, medium power
 <br> -> Component suppliers: Low interest, medium power
 <br> -> Regulatory authorities: Low interest, high power
+
