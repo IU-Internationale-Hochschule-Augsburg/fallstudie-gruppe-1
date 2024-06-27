@@ -32,9 +32,18 @@ class ObjectTracker:
             cv2.putText(frame, f'ID: {obj_id}', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
 def main():
+
+    cap = cv2.VideoCapture(0)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH,1920)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT,1080)
+    if not cap.isOpened():
+        print("Error: Could not open camera.")
+        return
+
+
     # Pfad zum Video
-    video_path = 'path/to/your/video.mp4'
-    cap = cv2.VideoCapture(video_path)
+   # video_path = 'path/to/your/video.mp4'
+    # cap = cv2.VideoCapture(video_path)
 
     if not cap.isOpened():
         print("Error: Could not open video.")
