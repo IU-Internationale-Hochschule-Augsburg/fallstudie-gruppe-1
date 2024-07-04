@@ -13,8 +13,8 @@ headers = {
 }
 
 # Global variables to store object data
-positionZumo = [0, 0, 0, 0]
-positionObject = [0, 0, 0, 0]
+positionZumo = "[0, 0, 0, 0]"
+positionObject = "[0, 0, 0, 0]"
 
 def nothing(x):
     pass
@@ -42,9 +42,9 @@ def validate_data(data):
     try:
         assert "Zumo" in data
         assert "Object" in data
-        assert isinstance(data["Zumo"]["positionZumo"], list) and len(data["Zumo"]["positionZumo"]) == 4
+        assert isinstance(data["Zumo"]["positionZumo"], str)
         assert isinstance(data["Zumo"]["facing"], list) and len(data["Zumo"]["facing"]) == 2
-        assert isinstance(data["Object"]["positionObject"], list) and len(data["Object"]["positionObject"]) == 4
+        assert isinstance(data["Object"]["positionObject"], str)
     except AssertionError:
         return False
     return True
@@ -75,14 +75,21 @@ class ObjectTracker:
 
     def draw(self, frame):
         for obj_id, (x, y, w, h) in self.objects.items():
+            cx = x + w // 2
+            cy = y + h // 2
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
             cv2.putText(frame, f'ID: {obj_id}', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            cv2.circle(frame, (cx, cy), 5, (0, 0, 255), -1)  # Draw center point
 
     def set_new_data(self):
         global positionZumo, positionObject
         for obj_id, (x, y, w, h) in self.objects.items():
-            positionZumo = [x, y, w, h]
-            positionObject = [x, y, w, h]
+            cx = x + w // 2
+            cy = y + h // 2
+            positionZumo = f"[{cx}, {cy}, {w}, {h}]"
+            positionObject = f"[{cx}, {cy}, {w}, {h}]"
+        print(f"Updated positionZumo: {positionZumo}")
+        print(f"Updated positionObject: {positionObject}")
 
 def main():
     cap = cv2.VideoCapture(0)
@@ -93,9 +100,9 @@ def main():
         return
 
     cv2.namedWindow('Settings')
-    cv2.createTrackbar('Blur', 'Settings', 6, 20, nothing)
-    cv2.createTrackbar('Canny Min', 'Settings', 43, 200, nothing)
-    cv2.createTrackbar('Canny Max', 'Settings', 99, 300, nothing)
+    cv2.createTrackbar('Blur', 'Settings', 7, 20, nothing)
+    cv2.createTrackbar('Canny Min', 'Settings', 75, 200, nothing)
+    cv2.createTrackbar('Canny Max', 'Settings', 150, 300, nothing)
     cv2.createTrackbar('Min Area', 'Settings', 178, 1000, nothing)
 
     tracker = ObjectTracker(threshold=10)
@@ -164,4 +171,4 @@ if __name__ == "__main__":
         else:
             print("Die Datenstruktur ist ungültig.")
 
-        time.sleep(1)
+        time.sleep(4)
