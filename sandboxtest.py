@@ -1,4 +1,6 @@
 import requests
+import json
+import time
 
 # URL und Header-Informationen
 url = "https://api.jsonbin.io/v3/b/666b25ece41b4d34e402d580"
@@ -22,7 +24,7 @@ def get_data():
         while 'record' in record:
             record = record['record']
         
-        print("Daten:", record)
+        print("Daten:", json.dumps(record, indent=4))
     else:
         print(f"Fehler bei der Verbindung: {response.status_code}")
 
@@ -36,14 +38,36 @@ def send_data(new_data):
     else:
         print(f"Fehler beim Senden der Daten: {response.status_code}")
 
+def validate_data(data):
+    try:
+        assert "Zumo" in data
+        assert "Object" in data
+        assert isinstance(data["Zumo"]["positionZumo"], list) and len(data["Zumo"]["positionZumo"]) == 4
+        assert isinstance(data["Zumo"]["facing"], list) and len(data["Zumo"]["facing"]) == 2
+        assert isinstance(data["Object"]["positionObject"], list) and len(data["Object"]["positionObject"]) == 4
+    except AssertionError:
+        return False
+    return True
+
 if __name__ == "__main__":
     get_data()
 
     # Neue Daten definieren
     new_data = {
-        "neues": "Beispiel",
-        "daten": "hier"
+        "Zumo": {
+            "positionZumo": [100, 150, 50, 50],
+            "facing": [1, 0]
+        },
+        "Object": {
+            "positionObject": [200, 250, 100, 100]
+        }
     }
 
-    send_data(new_data)
-    get_data()  # Um die neuen Daten zu überprüfen
+while True:
+    if validate_data(new_data):
+        send_data(new_data)
+        get_data()  # Um die neuen Daten zu überprüfen
+    else:
+        print("Die Datenstruktur ist ungültig.")
+    
+    time.sleep(1)
