@@ -106,11 +106,18 @@ class ObjectTracker:
 
     def set_new_data(self):
         global positionZumo, positionObject
-        for obj_id in self.objects.keys():
-            x, y, w, h = self.get_smoothed_position(obj_id)  # Verwendung der geglätteten Position
+        sorted_ids = sorted(self.objects.keys())
+        if len(sorted_ids) > 0:
+            lowest_id = sorted_ids[0]
+            x, y, w, h = self.get_smoothed_position(lowest_id)
             cx = x + w // 2
             cy = y + h // 2
             positionZumo = f"[{cx}, {cy}, {w}, {h}]"
+        if len(sorted_ids) > 1:
+            second_lowest_id = sorted_ids[1]
+            x, y, w, h = self.get_smoothed_position(second_lowest_id)
+            cx = x + w // 2
+            cy = y + h // 2
             positionObject = f"[{cx}, {cy}, {w}, {h}]"
         print(f"Updated positionZumo: {positionZumo}")
         print(f"Updated positionObject: {positionObject}")
