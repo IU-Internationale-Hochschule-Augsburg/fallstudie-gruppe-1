@@ -157,7 +157,7 @@ def main():
         cv2.normalize(frame, normalized_frame, 0, 255, cv2.NORM_MINMAX)
 
         gray = cv2.cvtColor(normalized_frame, cv2.COLOR_BGR2GRAY)
-        blurred = cv2.GaussianBlur(gray, (blur_value, blur_value), 0)
+        blurred = cv2.GaussianBlur(gray, (blur_value, blur_value), 1)
 
         edged = cv2.Canny(blurred, canny_min, canny_max)
         contours, _ = cv2.findContours(edged, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
