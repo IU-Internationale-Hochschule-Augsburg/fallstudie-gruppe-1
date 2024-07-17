@@ -3,6 +3,7 @@ import numpy as np
 import requests
 import json
 import time
+import threading
 
 # URL and header information for the API
 url = "https://api.jsonbin.io/v3/b/666b25ece41b4d34e402d580"
@@ -50,10 +51,12 @@ def validate_data(data):
     return True
 
 class ObjectTracker:
-    def __init__(self, threshold=10):
+    def __init__(self, threshold=10, buffer_size=5):  # buffer_size hinzugefügt
         self.threshold = threshold
         self.objects = {}
         self.next_id = 0
+        self.buffer_size = buffer_size  # Neuer Pufferbereich
+        self.position_buffers = {}  # Position-Puffer
 
     def update(self, contours):
         global positionZumo, positionObject
@@ -71,10 +74,30 @@ class ObjectTracker:
                     new_objects[self.next_id] = (x, y, w, h)
                     self.next_id += 1
         self.objects = new_objects
+        self.update_buffers()  # Aktualisieren der Puffer
         self.set_new_data()
 
-    def draw(self, frame):
+    def update_buffers(self):  # Neue Methode zum Aktualisieren der Puffer
         for obj_id, (x, y, w, h) in self.objects.items():
+            if obj_id not in self.position_buffers:
+                self.position_buffers[obj_id] = []
+            self.position_buffers[obj_id].append((x, y, w, h))
+            if len(self.position_buffers[obj_id]) > self.buffer_size:
+                self.position_buffers[obj_id].pop(0)
+
+    def get_smoothed_position(self, obj_id):  # Neue Methode zur Berechnung der geglätteten Position
+        buffer = self.position_buffers.get(obj_id, [])
+        if not buffer:
+            return 0, 0, 0, 0
+        avg_x = sum(b[0] for b in buffer) // len(buffer)
+        avg_y = sum(b[1] for b in buffer) // len(buffer)
+        avg_w = sum(b[2] for b in buffer) // len(buffer)
+        avg_h = sum(b[3] for b in buffer) // len(buffer)
+        return avg_x, avg_y, avg_w, avg_h
+
+    def draw(self, frame):
+        for obj_id in self.objects.keys():
+            x, y, w, h = self.get_smoothed_position(obj_id)  # Verwendung der geglätteten Position
             cx = x + w // 2
             cy = y + h // 2
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
@@ -83,10 +106,18 @@ class ObjectTracker:
 
     def set_new_data(self):
         global positionZumo, positionObject
-        for obj_id, (x, y, w, h) in self.objects.items():
+        sorted_ids = sorted(self.objects.keys())
+        if len(sorted_ids) > 0:
+            lowest_id = sorted_ids[0]
+            x, y, w, h = self.get_smoothed_position(lowest_id)
             cx = x + w // 2
             cy = y + h // 2
             positionZumo = f"[{cx}, {cy}, {w}, {h}]"
+        if len(sorted_ids) > 1:
+            second_lowest_id = sorted_ids[1]
+            x, y, w, h = self.get_smoothed_position(second_lowest_id)
+            cx = x + w // 2
+            cy = y + h // 2
             positionObject = f"[{cx}, {cy}, {w}, {h}]"
         print(f"Updated positionZumo: {positionZumo}")
         print(f"Updated positionObject: {positionObject}")
@@ -105,7 +136,7 @@ def main():
     cv2.createTrackbar('Canny Max', 'Settings', 150, 300, nothing)
     cv2.createTrackbar('Min Area', 'Settings', 178, 1000, nothing)
 
-    tracker = ObjectTracker(threshold=10)
+    tracker = ObjectTracker(threshold=10, buffer_size=5)  # buffer_size hinzugefügt
 
     while True:
         ret, frame = cap.read()
@@ -145,7 +176,6 @@ def main():
 
 if __name__ == "__main__":
     # Start the object tracking in a separate thread or process if needed
-    import threading
 
     tracking_thread = threading.Thread(target=main)
     tracking_thread.start()
