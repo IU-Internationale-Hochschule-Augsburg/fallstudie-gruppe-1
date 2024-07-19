@@ -17,20 +17,27 @@ The system is aimed at individuals who want to use and/or further develop the ov
 
 ### 3. System Architecture
 **Hardware Level:**<br>
-- **Raspberry Pi**: Performs image processing and object detection and sends the data to the Zumo Robot.<br>
-- **Camera**: Captures images and sends them to the Pi for processing.<br>
-- **WiFi Module**: Enables network connection for data transmission.<br>
+- **Raspberry Pi**: Performs image processing and object detection and sends the data to the Zumo Robot. [Raspberry Pi](https://www.raspberrypi.com/)<br>
+- **WiFi Module** (Part of the Raspberry Pi): Enables network connection for data transmission.<br>
+- **Camera**: Captures images and sends them to the Pi for processing. [Logitech StreamCam](https://www.logitech.com/de-de/products/webcams/streamcam.960-001281.html)<br>
 - **Control PC**: Used to operate the Pi via SSH.<br>
 
 **Software Level:**<br>
-- **Python**: Programming language for software development.<br>
-- **OpenCV**: Used to process camera images and detect objects.<br>
+- **Python**: Programming language for software development. [Python](https://www.python.org/)<br>
+- **OpenCV** (Version 4.5.3.56): Used to process camera images and detect objects. [OpenCV](https://opencv.org/)<br>
 
 ### 4. Communication
+
+**JSON**: Data format for transmitting information between devices.<br>
+
+**JSONBin API**:  Webserver hostet on JSONBin, used to receive, save, und send data from/to the Raspberry Pi and the Zumo Robot.<br>
+It is important to note that since the free plan of JSONBin is used, there are limitations regarding the number of requests and the JSON size.<br>
+It might be necessary to create a new JSONBin Webserver for continued work on the project. [JSONBin](https://jsonbin.io/)<br>
+
+
 **Communication Protocols:**<br>
 - **SSH**: Used communicate between Control PC and PI.<br>
 - **HTTP**: Used to send and receive data between the Raspberry Pi and the Zumo Robot.<br>
-- **JSON**: Data format for transmitting information between devices.<br>
 
 **Network Communication:**<br>
 - **WiFi**: Allows the Raspberry Pi to connect to the network to send data to the Zumo Robot.<br>
@@ -44,15 +51,15 @@ The system is aimed at individuals who want to use and/or further develop the ov
   - Updates detected objects (`def update`).<br>
   - Updates the data of detected objects (`def update_buffers`).<br>
   - Smooths the data of detected objects (`def get_smoothed_position`).<br>
-  - Draws the boundary (rectangle) and center (dot) of detected objects.<br>
+  - Draws the boundary (rectangle) and center (dot) of detected objects (`def draw`).<br>
   - Updates `positionZumo` and `positionObject` (`def set_new_data()`).<br>
 - **main Function**:<br>
-  - Normalizes the frame.<br>
-  - Creates a grayscale image.<br>
-  - Smooths the grayscale image using Gaussian Blur.<br>
-  - Canny algorithm: Identifies edges.<br>
-  - Identifies object contours.<br>
-  - Determines object sizes, identifies the largest object as the Zumo Robot.<br>
+  1. Normalizes the frame.<br>
+  2. Creates a grayscale image.<br>
+  3. Smooths the grayscale image using Gaussian Blur.<br>
+  4. Canny algorithm: Identifies edges.<br>
+  5. Identifies object contours.<br>
+  6. Identifies the Zumo Robot.<br>
 
 **Main Program:**<br>
 - Starts the main function.<br>
